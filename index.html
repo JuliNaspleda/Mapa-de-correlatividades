@@ -221,6 +221,7 @@
         // Canvas y contexto
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const viewport = document.getElementById('viewport');
 
         // Variables de transformación
         let scale = 1;
@@ -432,7 +433,6 @@
         function iniciarAplicacion() {
             materiasData.forEach(m => materiasMap.set(m.codigo, m));
             layout = calcularLayout();
-            const viewport = document.getElementById('viewport');
             layout.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'subject';
