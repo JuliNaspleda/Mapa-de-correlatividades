@@ -1,0 +1,640 @@
+[
+  {
+    "codigo": "03621",
+    "materia": "MATEMATICA DISCRETA",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03622",
+    "materia": "ANALISIS MATEMATICO I",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03623",
+    "materia": "PROGRAMACION INICIAL",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03624",
+    "materia": "INTRODUCCION A LOS SISTEMAS DE INFORMACION",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03625",
+    "materia": "SISTEMAS DE NUMERACION",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03626",
+    "materia": "PRINCIPIOS DE CALIDAD DE SOFTWARE",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00901",
+    "materia": "INGLES NIVEL I",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00911",
+    "materia": "COMPUTACION NIVEL I",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03627",
+    "materia": "ALGEBRA Y GEOMETRIA ANALITICA I",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03628",
+    "materia": "FISICA I",
+    "anio": 1,
+    "correlativas": [
+      "03622"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03629",
+    "materia": "PROGRAMACION ESTRUCTURADA BASICA",
+    "anio": 1,
+    "correlativas": [
+      "03623"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03630",
+    "materia": "INTRODUCCION A LA GESTION DE REQUISITOS",
+    "anio": 1,
+    "correlativas": [
+      "03624"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03631",
+    "materia": "FUNDAMENTOS DE SISTEMAS EMBEBIDOS",
+    "anio": 1,
+    "correlativas": [
+      "03625"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03632",
+    "materia": "INTRODUCCION A LOS PROYECTOS INFORMATICOS",
+    "anio": 1,
+    "correlativas": [],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00902",
+    "materia": "INGLES NIVEL II",
+    "anio": 2,
+    "correlativas": [
+      "00901"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00912",
+    "materia": "COMPUTACION NIVEL II",
+    "anio": 2,
+    "correlativas": [
+      "00911"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03633",
+    "materia": "ANALISIS MATEMATICO II",
+    "anio": 2,
+    "correlativas": [
+      "03622"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03634",
+    "materia": "FISICA II",
+    "anio": 2,
+    "correlativas": [
+      "03628"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03635",
+    "materia": "TOPICOS DE PROGRAMACION",
+    "anio": 2,
+    "correlativas": [
+      "03621",
+      "03629"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03636",
+    "materia": "BASES DE DATOS",
+    "anio": 2,
+    "correlativas": [
+      "03621",
+      "03629"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03637",
+    "materia": "ANALISIS DE SISTEMAS",
+    "anio": 2,
+    "correlativas": [
+      "03630"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03638",
+    "materia": "ARQUITECTURA DE COMPUTADORAS",
+    "anio": 2,
+    "correlativas": [
+      "03631"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03676",
+    "materia": "RESPONSABILIDAD SOCIAL UNIVERSITARIA",
+    "anio": 2,
+    "correlativas": [
+      "03626"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00903",
+    "materia": "INGLES NIVEL III",
+    "anio": 2,
+    "correlativas": [
+      "00902"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03639",
+    "materia": "ANALISIS MATEMATICO III",
+    "anio": 2,
+    "correlativas": [
+      "03633"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03640",
+    "materia": "ALGORITMOS Y ESTRUCTURAS DE DATOS",
+    "anio": 2,
+    "correlativas": [
+      "03635"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03641",
+    "materia": "BASES DE DATOS APLICADAS",
+    "anio": 2,
+    "correlativas": [
+      "03635",
+      "03636"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03642",
+    "materia": "PRINCIPIOS DE DISEÑO DE SISTEMAS",
+    "anio": 2,
+    "correlativas": [
+      "03626",
+      "03637"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03643",
+    "materia": "REDES DE COMPUTADORAS",
+    "anio": 2,
+    "correlativas": [
+      "03638"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03644",
+    "materia": "GESTION DE LAS ORGANIZACIONES",
+    "anio": 2,
+    "correlativas": [
+      "03632"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "00904",
+    "materia": "INGLES NIVEL IV",
+    "anio": 3,
+    "correlativas": [
+      "00903"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03645",
+    "materia": "ALGEBRA Y GEOMETRIA ANALITICA II",
+    "anio": 3,
+    "correlativas": [
+      "03627"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03646",
+    "materia": "PARADIGMAS DE PROGRAMACION",
+    "anio": 3,
+    "correlativas": [
+      "03633",
+      "03640"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03647",
+    "materia": "REQUISITOS AVANZADOS",
+    "anio": 3,
+    "correlativas": [
+      "03642"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03648",
+    "materia": "DISEÑO DE SOFTWARE",
+    "anio": 3,
+    "correlativas": [
+      "03635",
+      "03636",
+      "03642"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03649",
+    "materia": "SISTEMAS OPERATIVOS",
+    "anio": 3,
+    "correlativas": [
+      "03629",
+      "03638"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03650",
+    "materia": "SEGURIDAD DE LA INFORMACION",
+    "anio": 3,
+    "correlativas": [
+      "03635",
+      "03638",
+      "03643"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03675",
+    "materia": "PRACTICA PROFESIONAL SUPERVISADA",
+    "anio": 3,
+    "correlativas": [
+      "03636",
+      "03640",
+      "03642"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 200
+  },
+  {
+    "codigo": "03651",
+    "materia": "PROBABILIDAD Y ESTADISTICA",
+    "anio": 3,
+    "correlativas": [
+      "03621",
+      "03639",
+      "03645"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03652",
+    "materia": "PROGRAMACION AVANZADA",
+    "anio": 3,
+    "correlativas": [
+      "03646",
+      "03641"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03653",
+    "materia": "ARQUITECTURA DE SISTEMAS SOFTWARE",
+    "anio": 3,
+    "correlativas": [
+      "03648"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03654",
+    "materia": "VIRTUALIZACION DE HARDWARE",
+    "anio": 3,
+    "correlativas": [
+      "03643",
+      "03649"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03655",
+    "materia": "AUDITORIA Y LEGISLACION",
+    "anio": 3,
+    "correlativas": [
+      "03650"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03656",
+    "materia": "ESTADISTICA APLICADA",
+    "anio": 4,
+    "correlativas": [
+      "03651"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03657",
+    "materia": "AUTOMATAS Y GRAMATICAS",
+    "anio": 4,
+    "correlativas": [
+      "03646"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03658",
+    "materia": "PROGRAMACION CONCURRENTE",
+    "anio": 4,
+    "correlativas": [
+      "03646",
+      "03649"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03659",
+    "materia": "GESTION APLICADA AL DESARROLLO DE SOFTWARE I",
+    "anio": 4,
+    "correlativas": [
+      "03644",
+      "03647",
+      "03648"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03660",
+    "materia": "SISTEMAS OPERATIVOS AVANZADOS",
+    "anio": 4,
+    "correlativas": [
+      "03634",
+      "03654"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03661",
+    "materia": "GESTION DE PROYECTOS",
+    "anio": 4,
+    "correlativas": [
+      "03644",
+      "03650",
+      "03651"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03662",
+    "materia": "MATEMATICA APLICADA",
+    "anio": 4,
+    "correlativas": [
+      "03651"
+    ],
+    "horas_semanales": 6,
+    "horas_totales": 96
+  },
+  {
+    "codigo": "03663",
+    "materia": "LENGUAJES Y COMPILADORES",
+    "anio": 4,
+    "correlativas": [
+      "03657"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03664",
+    "materia": "INTELIGENCIA ARTIFICIAL",
+    "anio": 4,
+    "correlativas": [
+      "03646",
+      "03651"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03665",
+    "materia": "GESTION APLICADA AL DESARROLLO DE SOFTWARE II",
+    "anio": 4,
+    "correlativas": [
+      "03653",
+      "03659"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03666",
+    "materia": "SEGURIDAD APLICADA Y FORENSIA",
+    "anio": 4,
+    "correlativas": [
+      "03649",
+      "03652",
+      "03655"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03667",
+    "materia": "GESTION DE LA CALIDAD EN PROCESOS DE SISTEMAS",
+    "anio": 4,
+    "correlativas": [
+      "03642",
+      "03661"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03668",
+    "materia": "INTELIGENCIA ARTIFICIAL APLICADA",
+    "anio": 5,
+    "correlativas": [
+      "03656",
+      "03664"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03669",
+    "materia": "INNOVACION Y EMPRENDEDORISMO",
+    "anio": 5,
+    "correlativas": [
+      "03661"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03670",
+    "materia": "CIENCIA DE DATOS",
+    "anio": 5,
+    "correlativas": [
+      "03656",
+      "03664"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03672",
+    "materia": "ELECTIVA I",
+    "anio": 5,
+    "correlativas": [
+      "03652",
+      "03653",
+      "03661"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03673",
+    "materia": "ELECTIVA II",
+    "anio": 5,
+    "correlativas": [
+      "03652",
+      "03653",
+      "03661"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03674",
+    "materia": "ELECTIVA III",
+    "anio": 5,
+    "correlativas": [
+      "03652",
+      "03653",
+      "03661"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 64
+  },
+  {
+    "codigo": "03671",
+    "materia": "PROYECTO FINAL DE CARRERA",
+    "anio": 5,
+    "correlativas": [
+      "03656",
+      "03659",
+      "03660",
+      "03667"
+    ],
+    "horas_semanales": 4,
+    "horas_totales": 128
+  }
+]
