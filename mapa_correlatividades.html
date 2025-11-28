@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Correlatividades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            cursor: grab;
+            overflow: hidden;
+        }
+        
+        #container:active {
+            cursor: grabbing;
+        }
+        
+        #viewport {
+            position: absolute;
+            width: 5000px;
+            height: 5000px;
+            left: 0;
+            top: 0;
+            transform-origin: 0 0;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5000px;
+            height: 5000px;
+        }
+        
+        .subject {
+            position: absolute;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 14.5px;
+            font-weight: 500;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 160px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+            line-height: 1.3;
+        }
+        
+        .subject:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .subject.highlighted {
+            font-weight: bold;
+        }
+        
+        #topBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        #progressContainer {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        #progressBar {
+            width: 100%;
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        #progressText {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        #resetButton {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #f44336;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        #resetButton:hover {
+            background: #d32f2f;
+        }
+        
+        #legend {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid rgba(0,0,0,0.2);
+        }
+        
+        .legend-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="topBar">
+        <div id="progressContainer">
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+            <div id="progressText">0% completado (0/0 materias)</div>
+        </div>
+        <button id="resetButton" onclick="resetAprobadas()">Reiniciar Progreso</button>
+    </div>
+    
+    <div id="container">
+        <div id="viewport">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+    
+    <div id="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #cbe4f9;"></div>
+            <div class="legend-text">Primer año</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #cbf3f4;"></div>
+            <div class="legend-text">Segundo año</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #eff9da;"></div>
+            <div class="legend-text">Tercer año</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #f9ebdf;"></div>
+            <div class="legend-text">Cuarto año</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #f9d8d6;"></div>
+            <div class="legend-text">Quinto año</div>
+        </div>
+    </div>
+
+    <script>
+        // JSON de materias
+        const materiasData = [{"codigo":"03621","materia":"MATEMATICA DISCRETA","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03622","materia":"ANALISIS MATEMATICO I","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03623","materia":"PROGRAMACION INICIAL","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03624","materia":"INTRODUCCION A LOS SISTEMAS DE INFORMACION","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03625","materia":"SISTEMAS DE NUMERACION","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03626","materia":"PRINCIPIOS DE CALIDAD DE SOFTWARE","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"00901","materia":"INGLES NIVEL I","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"00911","materia":"COMPUTACION NIVEL I","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03627","materia":"ALGEBRA Y GEOMETRIA ANALITICA I","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"03628","materia":"FISICA I","anio":1,"correlativas":["03622"],"horas_semanales":4,"horas_totales":64},{"codigo":"03629","materia":"PROGRAMACION ESTRUCTURADA BASICA","anio":1,"correlativas":["03623"],"horas_semanales":4,"horas_totales":64},{"codigo":"03630","materia":"INTRODUCCION A LA GESTION DE REQUISITOS","anio":1,"correlativas":["03624"],"horas_semanales":4,"horas_totales":64},{"codigo":"03631","materia":"FUNDAMENTOS DE SISTEMAS EMBEBIDOS","anio":1,"correlativas":["03625"],"horas_semanales":4,"horas_totales":64},{"codigo":"03632","materia":"INTRODUCCION A LOS PROYECTOS INFORMATICOS","anio":1,"correlativas":[],"horas_semanales":4,"horas_totales":64},{"codigo":"00902","materia":"INGLES NIVEL II","anio":2,"correlativas":["00901"],"horas_semanales":4,"horas_totales":64},{"codigo":"00912","materia":"COMPUTACION NIVEL II","anio":2,"correlativas":["00911"],"horas_semanales":4,"horas_totales":64},{"codigo":"03633","materia":"ANALISIS MATEMATICO II","anio":2,"correlativas":["03622"],"horas_semanales":4,"horas_totales":64},{"codigo":"03634","materia":"FISICA II","anio":2,"correlativas":["03628"],"horas_semanales":4,"horas_totales":64},{"codigo":"03635","materia":"TOPICOS DE PROGRAMACION","anio":2,"correlativas":["03621","03629"],"horas_semanales":4,"horas_totales":64},{"codigo":"03636","materia":"BASES DE DATOS","anio":2,"correlativas":["03621","03629"],"horas_semanales":4,"horas_totales":64},{"codigo":"03637","materia":"ANALISIS DE SISTEMAS","anio":2,"correlativas":["03630"],"horas_semanales":4,"horas_totales":64},{"codigo":"03638","materia":"ARQUITECTURA DE COMPUTADORAS","anio":2,"correlativas":["03631"],"horas_semanales":4,"horas_totales":64},{"codigo":"03676","materia":"RESPONSABILIDAD SOCIAL UNIVERSITARIA","anio":2,"correlativas":["03626"],"horas_semanales":4,"horas_totales":64},{"codigo":"00903","materia":"INGLES NIVEL III","anio":2,"correlativas":["00902"],"horas_semanales":4,"horas_totales":64},{"codigo":"03639","materia":"ANALISIS MATEMATICO III","anio":2,"correlativas":["03633"],"horas_semanales":4,"horas_totales":64},{"codigo":"03640","materia":"ALGORITMOS Y ESTRUCTURAS DE DATOS","anio":2,"correlativas":["03635"],"horas_semanales":4,"horas_totales":64},{"codigo":"03641","materia":"BASES DE DATOS APLICADAS","anio":2,"correlativas":["03635","03636"],"horas_semanales":4,"horas_totales":64},{"codigo":"03642","materia":"PRINCIPIOS DE DISEÑO DE SISTEMAS","anio":2,"correlativas":["03626","03637"],"horas_semanales":4,"horas_totales":64},{"codigo":"03643","materia":"REDES DE COMPUTADORAS","anio":2,"correlativas":["03638"],"horas_semanales":4,"horas_totales":64},{"codigo":"03644","materia":"GESTION DE LAS ORGANIZACIONES","anio":2,"correlativas":["03632"],"horas_semanales":4,"horas_totales":64},{"codigo":"00904","materia":"INGLES NIVEL IV","anio":3,"correlativas":["00903"],"horas_semanales":4,"horas_totales":64},{"codigo":"03645","materia":"ALGEBRA Y GEOMETRIA ANALITICA II","anio":3,"correlativas":["03627"],"horas_semanales":4,"horas_totales":64},{"codigo":"03646","materia":"PARADIGMAS DE PROGRAMACION","anio":3,"correlativas":["03633","03640"],"horas_semanales":4,"horas_totales":64},{"codigo":"03647","materia":"REQUISITOS AVANZADOS","anio":3,"correlativas":["03642"],"horas_semanales":4,"horas_totales":64},{"codigo":"03648","materia":"DISEÑO DE SOFTWARE","anio":3,"correlativas":["03635","03636","03642"],"horas_semanales":4,"horas_totales":64},{"codigo":"03649","materia":"SISTEMAS OPERATIVOS","anio":3,"correlativas":["03629","03638"],"horas_semanales":4,"horas_totales":64},{"codigo":"03650","materia":"SEGURIDAD DE LA INFORMACION","anio":3,"correlativas":["03635","03638","03643"],"horas_semanales":4,"horas_totales":64},{"codigo":"03675","materia":"PRACTICA PROFESIONAL SUPERVISADA","anio":3,"correlativas":["03636","03640","03642"],"horas_semanales":4,"horas_totales":200},{"codigo":"03651","materia":"PROBABILIDAD Y ESTADISTICA","anio":3,"correlativas":["03621","03639","03645"],"horas_semanales":4,"horas_totales":64},{"codigo":"03652","materia":"PROGRAMACION AVANZADA","anio":3,"correlativas":["03646","03641"],"horas_semanales":4,"horas_totales":64},{"codigo":"03653","materia":"ARQUITECTURA DE SISTEMAS SOFTWARE","anio":3,"correlativas":["03648"],"horas_semanales":4,"horas_totales":64},{"codigo":"03654","materia":"VIRTUALIZACION DE HARDWARE","anio":3,"correlativas":["03643","03649"],"horas_semanales":4,"horas_totales":64},{"codigo":"03655","materia":"AUDITORIA Y LEGISLACION","anio":3,"correlativas":["03650"],"horas_semanales":4,"horas_totales":64},{"codigo":"03656","materia":"ESTADISTICA APLICADA","anio":4,"correlativas":["03651"],"horas_semanales":4,"horas_totales":64},{"codigo":"03657","materia":"AUTOMATAS Y GRAMATICAS","anio":4,"correlativas":["03646"],"horas_semanales":4,"horas_totales":64},{"codigo":"03658","materia":"PROGRAMACION CONCURRENTE","anio":4,"correlativas":["03646","03649"],"horas_semanales":4,"horas_totales":64},{"codigo":"03659","materia":"GESTION APLICADA AL DESARROLLO DE SOFTWARE I","anio":4,"correlativas":["03644","03647","03648"],"horas_semanales":4,"horas_totales":64},{"codigo":"03660","materia":"SISTEMAS OPERATIVOS AVANZADOS","anio":4,"correlativas":["03634","03654"],"horas_semanales":4,"horas_totales":64},{"codigo":"03661","materia":"GESTION DE PROYECTOS","anio":4,"correlativas":["03644","03650","03651"],"horas_semanales":4,"horas_totales":64},{"codigo":"03662","materia":"MATEMATICA APLICADA","anio":4,"correlativas":["03651"],"horas_semanales":6,"horas_totales":96},{"codigo":"03663","materia":"LENGUAJES Y COMPILADORES","anio":4,"correlativas":["03657"],"horas_semanales":4,"horas_totales":64},{"codigo":"03664","materia":"INTELIGENCIA ARTIFICIAL","anio":4,"correlativas":["03646","03651"],"horas_semanales":4,"horas_totales":64},{"codigo":"03665","materia":"GESTION APLICADA AL DESARROLLO DE SOFTWARE II","anio":4,"correlativas":["03653","03659"],"horas_semanales":4,"horas_totales":64},{"codigo":"03666","materia":"SEGURIDAD APLICADA Y FORENSIA","anio":4,"correlativas":["03649","03652","03655"],"horas_semanales":4,"horas_totales":64},{"codigo":"03667","materia":"GESTION DE LA CALIDAD EN PROCESOS DE SISTEMAS","anio":4,"correlativas":["03642","03661"],"horas_semanales":4,"horas_totales":64},{"codigo":"03668","materia":"INTELIGENCIA ARTIFICIAL APLICADA","anio":5,"correlativas":["03656","03664"],"horas_semanales":4,"horas_totales":64},{"codigo":"03669","materia":"INNOVACION Y EMPRENDEDORISMO","anio":5,"correlativas":["03661"],"horas_semanales":4,"horas_totales":64},{"codigo":"03670","materia":"CIENCIA DE DATOS","anio":5,"correlativas":["03656","03664"],"horas_semanales":4,"horas_totales":64},{"codigo":"03672","materia":"ELECTIVA I","anio":5,"correlativas":["03652","03653","03661"],"horas_semanales":4,"horas_totales":64},{"codigo":"03673","materia":"ELECTIVA II","anio":5,"correlativas":["03652","03653","03661"],"horas_semanales":4,"horas_totales":64},{"codigo":"03674","materia":"ELECTIVA III","anio":5,"correlativas":["03652","03653","03661"],"horas_semanales":4,"horas_totales":64},{"codigo":"03671","materia":"PROYECTO FINAL DE CARRERA","anio":5,"correlativas":["03656","03659","03660","03667"],"horas_semanales":4,"horas_totales":128}]
+        // Configuración de colores por año
+        const coloresPorAnio = {
+            1: { base: '#cbe4f9', arrow: '#99b2c7' },
+            2: { base: '#cbf3f4', arrow: '#9bc3c4' },
+            3: { base: '#eff9da', arrow: '#bdc7a8' },
+            4: { base: '#f9ebdf', arrow: '#c7b9ad' },
+            5: { base: '#f9d8d6', arrow: '#d3b2b0' }
+        };
+
+        const colorAprobada = '#92e562';
+        const colorAprobadaArrow = '#6bb841';
+        const colorDisponible = '#ffa500';
+        const colorDisponibleArrow = '#cc8400';
+
+        // Estado de las materias
+        const materiasAprobadas = new Set();
+        const materiasDestacadas = new Set();
+        
+        // Canvas y contexto
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Variables de transformación
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        // Mapa de materias por código
+        const materiasMap = new Map();
+        materiasData.forEach(m => materiasMap.set(m.codigo, m));
+
+        // Calcular layout con alineación vertical centrada
+        function calcularLayout() {
+            const materiasPorAnio = {};
+            materiasData.forEach(m => {
+                if (!materiasPorAnio[m.anio]) materiasPorAnio[m.anio] = [];
+                materiasPorAnio[m.anio].push(m);
+            });
+
+            const layout = [];
+            const columnWidth = 250;
+            const rowHeight = 100;
+            const baseX = 2200;
+
+            // Calcular el máximo de filas necesarias entre todos los años
+            let maxFilas = 0;
+            for (let anio = 1; anio <= 5; anio++) {
+                const materias = materiasPorAnio[anio] || [];
+                const filasAnio = Math.ceil(materias.length / 2);
+                maxFilas = Math.max(maxFilas, filasAnio);
+            }
+
+            // Calcular baseY para la primera fila
+            const baseY = 2500 - (maxFilas * rowHeight) / 2;
+
+            // Asignar posiciones centrando verticalmente cada año
+            for (let anio = 1; anio <= 5; anio++) {
+                const materias = materiasPorAnio[anio] || [];
+                const mitad = Math.ceil(materias.length / 2);
+                
+                const columna1 = materias.slice(0, mitad);
+                const columna2 = materias.slice(mitad);
+
+                // Calcular offset para centrar este año verticalmente
+                const filasEsteAnio = mitad;
+                const offsetFilas = (maxFilas - filasEsteAnio) / 2;
+
+                for (let i = 0; i < mitad; i++) {
+                    const yPos = baseY + (offsetFilas + i) * rowHeight;
+                    
+                    if (i < columna1.length) {
+                        layout.push({
+                            materia: columna1[i],
+                            x: baseX + (anio - 1) * 2 * columnWidth,
+                            y: yPos
+                        });
+                    }
+                    
+                    if (i < columna2.length) {
+                        layout.push({
+                            materia: columna2[i],
+                            x: baseX + ((anio - 1) * 2 + 1) * columnWidth,
+                            y: yPos
+                        });
+                    }
+                }
+            }
+
+            return layout;
+        }
+
+        const layout = calcularLayout();
+
+        // Calcular bounds del mapa
+        function calcularBounds() {
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            
+            layout.forEach(item => {
+                minX = Math.min(minX, item.x);
+                maxX = Math.max(maxX, item.x + 160);
+                minY = Math.min(minY, item.y);
+                maxY = Math.max(maxY, item.y + 80);
+            });
+            
+            return { minX, maxX, minY, maxY };
+        }
+
+        // Crear elementos HTML para las materias
+        const viewport = document.getElementById('viewport');
+        layout.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'subject';
+            div.textContent = item.materia.materia;
+            div.dataset.codigo = item.materia.codigo;
+            div.style.left = item.x + 'px';
+            div.style.top = item.y + 'px';
+            div.style.backgroundColor = coloresPorAnio[item.materia.anio].base;
+            
+            div.onclick = (e) => {
+                e.stopPropagation();
+                
+                if (e.ctrlKey || e.metaKey) {
+                    // CTRL+clic: destacar materia y sus flechas
+                    if (materiasDestacadas.has(item.materia.codigo)) {
+                        materiasDestacadas.delete(item.materia.codigo);
+                        div.classList.remove('highlighted');
+                    } else {
+                        materiasDestacadas.add(item.materia.codigo);
+                        div.classList.add('highlighted');
+                    }
+                    dibujarFlechas();
+                } else {
+                    // Clic normal: aprobar materia
+                    toggleAprobada(item.materia.codigo);
+                }
+            };
+            
+            viewport.appendChild(div);
+            item.element = div;
+        });
+
+        // Función para verificar si una materia está disponible
+        function estaDisponible(codigo) {
+            if (materiasAprobadas.has(codigo)) return false;
+            
+            const materia = materiasMap.get(codigo);
+            if (!materia.correlativas || materia.correlativas.length === 0) return true;
+            
+            return materia.correlativas.every(cor => materiasAprobadas.has(cor));
+        }
+
+        // Toggle estado de materia
+        function toggleAprobada(codigo) {
+            if (materiasAprobadas.has(codigo)) {
+                materiasAprobadas.delete(codigo);
+            } else {
+                materiasAprobadas.add(codigo);
+            }
+            actualizarEstados();
+            actualizarProgreso();
+            dibujarFlechas();
+        }
+
+        // Actualizar barra de progreso
+        function actualizarProgreso() {
+            const total = materiasData.length;
+            const aprobadas = materiasAprobadas.size;
+            const porcentaje = Math.round((aprobadas / total) * 100);
+            
+            document.getElementById('progressFill').style.width = porcentaje + '%';
+            document.getElementById('progressText').textContent = 
+                `${porcentaje}% completado (${aprobadas}/${total} materias)`;
+        }
+
+        // Actualizar colores de todas las materias
+        function actualizarEstados() {
+            layout.forEach(item => {
+                const codigo = item.materia.codigo;
+                const anio = item.materia.anio;
+                
+                if (materiasAprobadas.has(codigo)) {
+                    item.element.style.backgroundColor = colorAprobada;
+                } else if (estaDisponible(codigo)) {
+                    item.element.style.backgroundColor = colorDisponible;
+                } else {
+                    item.element.style.backgroundColor = coloresPorAnio[anio].base;
+                }
+            });
+        }
+
+        // Dibujar flechas con alta resolución
+        function dibujarFlechas() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 5000 * dpr;
+            canvas.height = 5000 * dpr;
+            canvas.style.width = '5000px';
+            canvas.style.height = '5000px';
+            ctx.scale(dpr, dpr);
+            
+            ctx.clearRect(0, 0, 5000, 5000);
+            
+            // Separar flechas normales y destacadas para dibujar en orden
+            const flechasNormales = [];
+            const flechasDestacadas = [];
+            
+            layout.forEach(item => {
+                const fromCodigo = item.materia.codigo;
+                const fromX = item.x + 80;
+                const fromY = item.y + 40;
+                
+                const anio = item.materia.anio;
+                let arrowColor;
+                
+                if (materiasAprobadas.has(fromCodigo)) {
+                    arrowColor = colorAprobadaArrow;
+                } else if (estaDisponible(fromCodigo)) {
+                    arrowColor = colorDisponibleArrow;
+                } else {
+                    arrowColor = coloresPorAnio[anio].arrow;
+                }
+                
+                materiasData.forEach(targetMateria => {
+                    if (targetMateria.correlativas && targetMateria.correlativas.includes(fromCodigo)) {
+                        const targetItem = layout.find(l => l.materia.codigo === targetMateria.codigo);
+                        if (targetItem) {
+                            const toX = targetItem.x;
+                            const toY = targetItem.y + 40;
+                            
+                            const isHighlighted = materiasDestacadas.has(fromCodigo);
+                            
+                            const flechaData = {
+                                fromX, fromY, toX, toY,
+                                arrowColor, isHighlighted
+                            };
+                            
+                            if (isHighlighted) {
+                                flechasDestacadas.push(flechaData);
+                            } else {
+                                flechasNormales.push(flechaData);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Dibujar primero las flechas normales, luego las destacadas
+            [...flechasNormales, ...flechasDestacadas].forEach(flecha => {
+                const { fromX, fromY, toX, toY, arrowColor, isHighlighted } = flecha;
+                
+                const lineWidth = isHighlighted ? 4 : 2;
+                const arrowSize = isHighlighted ? 15 : 10;
+                
+                // Dibujar línea
+                ctx.strokeStyle = arrowColor;
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(fromX, fromY);
+                ctx.lineTo(toX, toY);
+                ctx.stroke();
+                
+                // Dibujar punta de flecha
+                const angle = Math.atan2(toY - fromY, toX - fromX);
+                ctx.beginPath();
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - arrowSize * Math.cos(angle - Math.PI / 6), toY - arrowSize * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(toX - arrowSize * Math.cos(angle + Math.PI / 6), toY - arrowSize * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = arrowColor;
+                ctx.fill();
+            });
+        }
+
+        // Funciones de zoom y pan
+        const container = document.getElementById('container');
+        
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            // Obtener posición del mouse relativa al contenedor
+            const rect = container.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calcular posición del mouse en el espacio del viewport antes del zoom
+            const worldX = (mouseX - offsetX) / scale;
+            const worldY = (mouseY - offsetY) / scale;
+            
+            // Calcular nuevo scale
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            const newScale = Math.max(0.2, Math.min(3, scale + delta));
+            
+            // Calcular nuevo offset para mantener el punto del mouse fijo
+            offsetX = mouseX - worldX * newScale;
+            offsetY = mouseY - worldY * newScale;
+            
+            scale = newScale;
+            aplicarTransformacion();
+        });
+
+        container.addEventListener('mousedown', (e) => {
+            if (e.target === container || e.target === canvas || e.target === viewport) {
+                isDragging = true;
+                startX = e.clientX - offsetX;
+                startY = e.clientY - offsetY;
+            }
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                offsetX = e.clientX - startX;
+                offsetY = e.clientY - startY;
+                aplicarTransformacion();
+            }
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        function aplicarTransformacion() {
+            viewport.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        }
+
+        function resetAprobadas() {
+            materiasAprobadas.clear();
+            materiasDestacadas.clear();
+            
+            // Remover clase highlighted de todos los elementos
+            layout.forEach(item => {
+                item.element.classList.remove('highlighted');
+            });
+            
+            actualizarEstados();
+            actualizarProgreso();
+            dibujarFlechas();
+        }
+
+        // Inicializar vista centrada
+        function inicializarVista() {
+            const bounds = calcularBounds();
+            const mapWidth = bounds.maxX - bounds.minX;
+            const mapHeight = bounds.maxY - bounds.minY;
+            
+            const containerWidth = window.innerWidth;
+            const containerHeight = window.innerHeight;
+            
+            // Calcular scale para que todo quepa en la pantalla (con margen)
+            const scaleX = (containerWidth * 0.9) / mapWidth;
+            const scaleY = (containerHeight * 0.85) / mapHeight;
+            scale = Math.min(scaleX, scaleY, 1);
+            
+            // Centrar el mapa
+            const mapCenterX = (bounds.minX + bounds.maxX) / 2;
+            const mapCenterY = (bounds.minY + bounds.maxY) / 2;
+            
+            offsetX = containerWidth / 2 - mapCenterX * scale;
+            offsetY = containerHeight / 2 - mapCenterY * scale;
+            
+            aplicarTransformacion();
+        }
+
+        // Inicializar
+        actualizarEstados();
+        actualizarProgreso();
+        dibujarFlechas();
+        inicializarVista();
+        
+        // Ajustar vista al redimensionar ventana
+        window.addEventListener('resize', inicializarVista);
+    </script>
+</body>
+</html>
