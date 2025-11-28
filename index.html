@@ -10,11 +10,13 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
             font-family: Arial, sans-serif;
             overflow: hidden;
             background: #f5f5f5;
         }
+        
         #container {
             width: 100vw;
             height: 100vh;
@@ -22,9 +24,11 @@
             cursor: grab;
             overflow: hidden;
         }
+        
         #container:active {
             cursor: grabbing;
         }
+        
         #viewport {
             position: absolute;
             width: 5000px;
@@ -33,6 +37,7 @@
             top: 0;
             transform-origin: 0 0;
         }
+        
         #canvas {
             position: absolute;
             top: 0;
@@ -40,6 +45,7 @@
             width: 5000px;
             height: 5000px;
         }
+        
         .subject {
             position: absolute;
             padding: 8px 10px;
@@ -60,14 +66,17 @@
             word-wrap: break-word;
             line-height: 1.3;
         }
+        
         .subject:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+        
         .subject.highlighted {
             font-weight: bold;
         }
+        
         #topBar {
             position: fixed;
             top: 0;
@@ -82,6 +91,7 @@
             justify-content: center;
             gap: 20px;
         }
+        
         #progressContainer {
             flex: 1;
             max-width: 500px;
@@ -90,6 +100,7 @@
             align-items: center;
             gap: 5px;
         }
+        
         #progressBar {
             width: 100%;
             height: 25px;
@@ -98,17 +109,20 @@
             overflow: hidden;
             position: relative;
         }
+        
         #progressFill {
             height: 100%;
             background: linear-gradient(90deg, #4CAF50, #45a049);
             width: 0%;
             transition: width 0.3s ease;
         }
+        
         #progressText {
             font-size: 14px;
             font-weight: bold;
             color: #333;
         }
+        
         #resetButton {
             padding: 10px 20px;
             border: none;
@@ -121,9 +135,11 @@
             transition: background 0.2s;
             white-space: nowrap;
         }
+        
         #resetButton:hover {
             background: #d32f2f;
         }
+        
         #legend {
             position: fixed;
             bottom: 0;
@@ -138,25 +154,62 @@
             gap: 30px;
             flex-wrap: wrap;
         }
+        
         .legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+        
         .legend-color {
             width: 24px;
             height: 24px;
             border-radius: 4px;
             border: 2px solid rgba(0,0,0,0.2);
         }
+        
         .legend-text {
             font-size: 14px;
             font-weight: 500;
             color: #333;
         }
+
+        #loadingMessage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        #errorMessage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #f44336;
+            color: white;
+            padding: 30px 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            font-size: 18px;
+            font-weight: 500;
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <div id="loadingMessage">Cargando materias...</div>
+    <div id="errorMessage"></div>
+
     <div id="topBar">
         <div id="progressContainer">
             <div id="progressBar">
@@ -166,13 +219,13 @@
         </div>
         <button id="resetButton" onclick="resetAprobadas()">Reiniciar Progreso</button>
     </div>
-
+    
     <div id="container">
         <div id="viewport">
             <canvas id="canvas"></canvas>
         </div>
     </div>
-
+    
     <div id="legend">
         <div class="legend-item">
             <div class="legend-color" style="background-color: #cbe4f9;"></div>
@@ -197,9 +250,9 @@
     </div>
 
     <script>
-        // JSON de materias
+        // Variable global para almacenar las materias
         let materiasData = [];
-
+        
         // Configuración de colores por año
         const coloresPorAnio = {
             1: { base: '#cbe4f9', arrow: '#99b2c7' },
@@ -217,12 +270,11 @@
         // Estado de las materias
         const materiasAprobadas = new Set();
         const materiasDestacadas = new Set();
-
+        
         // Canvas y contexto
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const viewport = document.getElementById('viewport');
-
+        
         // Variables de transformación
         let scale = 1;
         let offsetX = 0;
@@ -232,8 +284,38 @@
 
         // Mapa de materias por código
         const materiasMap = new Map();
-
         let layout = [];
+
+        // Función para cargar el JSON
+        async function cargarMaterias() {
+            try {
+                const response = await fetch('materias.json');
+                if (!response.ok) {
+                    throw new Error(`Error al cargar materias.json: ${response.status} ${response.statusText}`);
+                }
+                materiasData = await response.json();
+                
+                // Validar que sea un array
+                if (!Array.isArray(materiasData)) {
+                    throw new Error('El archivo materias.json debe contener un array de materias');
+                }
+
+                // Poblar el mapa de materias
+                materiasData.forEach(m => materiasMap.set(m.codigo, m));
+                
+                // Inicializar la aplicación
+                inicializarAplicacion();
+                
+                // Ocultar mensaje de carga
+                document.getElementById('loadingMessage').style.display = 'none';
+            } catch (error) {
+                console.error('Error al cargar materias:', error);
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = `Error: ${error.message}. Verifica que materias.json exista en el mismo directorio.`;
+                errorDiv.style.display = 'block';
+                document.getElementById('loadingMessage').style.display = 'none';
+            }
+        }
 
         // Calcular layout con alineación vertical centrada
         function calcularLayout() {
@@ -243,11 +325,12 @@
                 materiasPorAnio[m.anio].push(m);
             });
 
-            const layout = [];
+            const layoutTemp = [];
             const columnWidth = 250;
             const rowHeight = 100;
             const baseX = 2200;
 
+            // Calcular el máximo de filas necesarias entre todos los años
             let maxFilas = 0;
             for (let anio = 1; anio <= 5; anio++) {
                 const materias = materiasPorAnio[anio] || [];
@@ -255,31 +338,34 @@
                 maxFilas = Math.max(maxFilas, filasAnio);
             }
 
+            // Calcular baseY para la primera fila
             const baseY = 2500 - (maxFilas * rowHeight) / 2;
 
+            // Asignar posiciones centrando verticalmente cada año
             for (let anio = 1; anio <= 5; anio++) {
                 const materias = materiasPorAnio[anio] || [];
                 const mitad = Math.ceil(materias.length / 2);
-
+                
                 const columna1 = materias.slice(0, mitad);
                 const columna2 = materias.slice(mitad);
 
+                // Calcular offset para centrar este año verticalmente
                 const filasEsteAnio = mitad;
                 const offsetFilas = (maxFilas - filasEsteAnio) / 2;
 
                 for (let i = 0; i < mitad; i++) {
                     const yPos = baseY + (offsetFilas + i) * rowHeight;
-
+                    
                     if (i < columna1.length) {
-                        layout.push({
+                        layoutTemp.push({
                             materia: columna1[i],
                             x: baseX + (anio - 1) * 2 * columnWidth,
                             y: yPos
                         });
                     }
-
+                    
                     if (i < columna2.length) {
-                        layout.push({
+                        layoutTemp.push({
                             materia: columna2[i],
                             x: baseX + ((anio - 1) * 2 + 1) * columnWidth,
                             y: yPos
@@ -288,29 +374,67 @@
                 }
             }
 
-            return layout;
+            return layoutTemp;
         }
 
         // Calcular bounds del mapa
         function calcularBounds() {
             let minX = Infinity, maxX = -Infinity;
             let minY = Infinity, maxY = -Infinity;
-
+            
             layout.forEach(item => {
                 minX = Math.min(minX, item.x);
                 maxX = Math.max(maxX, item.x + 160);
                 minY = Math.min(minY, item.y);
                 maxY = Math.max(maxY, item.y + 80);
             });
-
+            
             return { minX, maxX, minY, maxY };
+        }
+
+        // Crear elementos HTML para las materias
+        function crearElementosMaterias() {
+            const viewport = document.getElementById('viewport');
+            layout.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'subject';
+                div.textContent = item.materia.materia;
+                div.dataset.codigo = item.materia.codigo;
+                div.style.left = item.x + 'px';
+                div.style.top = item.y + 'px';
+                div.style.backgroundColor = coloresPorAnio[item.materia.anio].base;
+                
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    if (e.ctrlKey || e.metaKey) {
+                        // CTRL+clic: destacar materia y sus flechas
+                        if (materiasDestacadas.has(item.materia.codigo)) {
+                            materiasDestacadas.delete(item.materia.codigo);
+                            div.classList.remove('highlighted');
+                        } else {
+                            materiasDestacadas.add(item.materia.codigo);
+                            div.classList.add('highlighted');
+                        }
+                        dibujarFlechas();
+                    } else {
+                        // Clic normal: aprobar materia
+                        toggleAprobada(item.materia.codigo);
+                    }
+                };
+                
+                viewport.appendChild(div);
+                item.element = div;
+            });
         }
 
         // Función para verificar si una materia está disponible
         function estaDisponible(codigo) {
             if (materiasAprobadas.has(codigo)) return false;
+            
             const materia = materiasMap.get(codigo);
             if (!materia.correlativas || materia.correlativas.length === 0) return true;
+            
             return materia.correlativas.every(cor => materiasAprobadas.has(cor));
         }
 
@@ -331,9 +455,9 @@
             const total = materiasData.length;
             const aprobadas = materiasAprobadas.size;
             const porcentaje = Math.round((aprobadas / total) * 100);
-
+            
             document.getElementById('progressFill').style.width = porcentaje + '%';
-            document.getElementById('progressText').textContent =
+            document.getElementById('progressText').textContent = 
                 `${porcentaje}% completado (${aprobadas}/${total} materias)`;
         }
 
@@ -342,7 +466,7 @@
             layout.forEach(item => {
                 const codigo = item.materia.codigo;
                 const anio = item.materia.anio;
-
+                
                 if (materiasAprobadas.has(codigo)) {
                     item.element.style.backgroundColor = colorAprobada;
                 } else if (estaDisponible(codigo)) {
@@ -355,108 +479,195 @@
 
         // Dibujar flechas con alta resolución
         function dibujarFlechas() {
-            canvas.width = 5000;
-            canvas.height = 5000;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 5000 * dpr;
+            canvas.height = 5000 * dpr;
+            canvas.style.width = '5000px';
+            canvas.style.height = '5000px';
+            ctx.scale(dpr, dpr);
+            
             ctx.clearRect(0, 0, 5000, 5000);
-
+            
+            // Separar flechas normales y destacadas para dibujar en orden
+            const flechasNormales = [];
+            const flechasDestacadas = [];
+            
             layout.forEach(item => {
                 const fromCodigo = item.materia.codigo;
                 const fromX = item.x + 80;
                 const fromY = item.y + 40;
-
+                
+                const anio = item.materia.anio;
+                let arrowColor;
+                
+                if (materiasAprobadas.has(fromCodigo)) {
+                    arrowColor = colorAprobadaArrow;
+                } else if (estaDisponible(fromCodigo)) {
+                    arrowColor = colorDisponibleArrow;
+                } else {
+                    arrowColor = coloresPorAnio[anio].arrow;
+                }
+                
                 materiasData.forEach(targetMateria => {
                     if (targetMateria.correlativas && targetMateria.correlativas.includes(fromCodigo)) {
                         const targetItem = layout.find(l => l.materia.codigo === targetMateria.codigo);
                         if (targetItem) {
                             const toX = targetItem.x;
                             const toY = targetItem.y + 40;
-                            ctx.strokeStyle = coloresPorAnio[item.materia.anio].arrow;
-                            ctx.beginPath();
-                            ctx.moveTo(fromX, fromY);
-                            ctx.lineTo(toX, toY);
-                            ctx.stroke();
+                            
+                            const isHighlighted = materiasDestacadas.has(fromCodigo);
+                            
+                            const flechaData = {
+                                fromX, fromY, toX, toY,
+                                arrowColor, isHighlighted
+                            };
+                            
+                            if (isHighlighted) {
+                                flechasDestacadas.push(flechaData);
+                            } else {
+                                flechasNormales.push(flechaData);
+                            }
                         }
                     }
                 });
+            });
+            
+            // Dibujar primero las flechas normales, luego las destacadas
+            [...flechasNormales, ...flechasDestacadas].forEach(flecha => {
+                const { fromX, fromY, toX, toY, arrowColor, isHighlighted } = flecha;
+                
+                const lineWidth = isHighlighted ? 4 : 2;
+                const arrowSize = isHighlighted ? 15 : 10;
+                
+                // Dibujar línea
+                ctx.strokeStyle = arrowColor;
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(fromX, fromY);
+                ctx.lineTo(toX, toY);
+                ctx.stroke();
+                
+                // Dibujar punta de flecha
+                const angle = Math.atan2(toY - fromY, toX - fromX);
+                ctx.beginPath();
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - arrowSize * Math.cos(angle - Math.PI / 6), toY - arrowSize * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(toX - arrowSize * Math.cos(angle + Math.PI / 6), toY - arrowSize * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = arrowColor;
+                ctx.fill();
             });
         }
 
         // Funciones de zoom y pan
         const container = document.getElementById('container');
-
+        
         container.addEventListener('wheel', (e) => {
             e.preventDefault();
+            
+            // Obtener posición del mouse relativa al contenedor
             const rect = container.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+            
+            // Calcular posición del mouse en el espacio del viewport antes del zoom
             const worldX = (mouseX - offsetX) / scale;
             const worldY = (mouseY - offsetY) / scale;
+            
+            // Calcular nuevo scale
             const delta = e.deltaY > 0 ? -0.1 : 0.1;
             const newScale = Math.max(0.2, Math.min(3, scale + delta));
+            
+            // Calcular nuevo offset para mantener el punto del mouse fijo
             offsetX = mouseX - worldX * newScale;
             offsetY = mouseY - worldY * newScale;
+            
             scale = newScale;
             aplicarTransformacion();
         });
 
+        container.addEventListener('mousedown', (e) => {
+            if (e.target === container || e.target === canvas || e.target === viewport) {
+                isDragging = true;
+                startX = e.clientX - offsetX;
+                startY = e.clientY - offsetY;
+            }
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                offsetX = e.clientX - startX;
+                offsetY = e.clientY - startY;
+                aplicarTransformacion();
+            }
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
         function aplicarTransformacion() {
+            const viewport = document.getElementById('viewport');
             viewport.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
         }
 
         function resetAprobadas() {
             materiasAprobadas.clear();
             materiasDestacadas.clear();
+            
+            // Remover clase highlighted de todos los elementos
             layout.forEach(item => {
                 item.element.classList.remove('highlighted');
             });
+            
             actualizarEstados();
             actualizarProgreso();
             dibujarFlechas();
         }
 
+        // Inicializar vista centrada
         function inicializarVista() {
             const bounds = calcularBounds();
             const mapWidth = bounds.maxX - bounds.minX;
             const mapHeight = bounds.maxY - bounds.minY;
+            
             const containerWidth = window.innerWidth;
             const containerHeight = window.innerHeight;
+            
+            // Calcular scale para que todo quepa en la pantalla (con margen)
             const scaleX = (containerWidth * 0.9) / mapWidth;
             const scaleY = (containerHeight * 0.85) / mapHeight;
             scale = Math.min(scaleX, scaleY, 1);
+            
+            // Centrar el mapa
             const mapCenterX = (bounds.minX + bounds.maxX) / 2;
             const mapCenterY = (bounds.minY + bounds.maxY) / 2;
+            
             offsetX = containerWidth / 2 - mapCenterX * scale;
             offsetY = containerHeight / 2 - mapCenterY * scale;
+            
             aplicarTransformacion();
         }
 
-        function iniciarAplicacion() {
-            materiasData.forEach(m => materiasMap.set(m.codigo, m));
+        // Función principal de inicialización
+        function inicializarAplicacion() {
             layout = calcularLayout();
-            layout.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'subject';
-                div.textContent = item.materia.materia;
-                div.dataset.codigo = item.materia.codigo;
-                div.style.left = item.x + 'px';
-                div.style.top = item.y + 'px';
-                div.style.backgroundColor = coloresPorAnio[item.materia.anio].base;
-                div.onclick = () => toggleAprobada(item.materia.codigo);
-                viewport.appendChild(div);
-                item.element = div;
-            });
+            crearElementosMaterias();
             actualizarEstados();
             actualizarProgreso();
             dibujarFlechas();
             inicializarVista();
+            
+            // Ajustar vista al redimensionar ventana
+            window.addEventListener('resize', inicializarVista);
         }
 
-        fetch('materias.json')
-            .then(r => r.json())
-            .then(data => {
-                materiasData = data;
-                iniciarAplicacion();
-            });
+        // Cargar materias al iniciar
+        cargarMaterias();
     </script>
 </body>
 </html>
