@@ -286,6 +286,29 @@
         const materiasMap = new Map();
         let layout = [];
 
+        const STORAGE_KEY = 'mapaCorrelatividadesProgreso';
+
+        function guardarProgreso() {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(Array.from(materiasAprobadas))
+            );
+        }
+
+        function cargarProgreso() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+
+            try {
+                const aprobadas = JSON.parse(raw);
+                materiasAprobadas.clear();
+                aprobadas.forEach(c => materiasAprobadas.add(c));
+            } catch (e) {
+                console.error('Error cargando progreso guardado', e);
+            }
+        }
+
+
         // Función para cargar el JSON
         async function cargarMaterias() {
             try {
@@ -445,6 +468,7 @@
             } else {
                 materiasAprobadas.add(codigo);
             }
+            guardarProgreso();
             actualizarEstados();
             actualizarProgreso();
             dibujarFlechas();
@@ -618,7 +642,8 @@
         function resetAprobadas() {
             materiasAprobadas.clear();
             materiasDestacadas.clear();
-            
+            localStorage.removeItem(STORAGE_KEY);
+
             // Remover clase highlighted de todos los elementos
             layout.forEach(item => {
                 item.element.classList.remove('highlighted');
@@ -657,6 +682,7 @@
         function inicializarAplicacion() {
             layout = calcularLayout();
             crearElementosMaterias();
+            cargarProgreso();
             actualizarEstados();
             actualizarProgreso();
             dibujarFlechas();
